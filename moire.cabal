@@ -22,6 +22,7 @@ executable moire
   build-depends:
       base >= 4.7 && < 5.0
     , relude ^>= 0.5.0
+    , JuicyPixels
     , optparse-applicative
   mixins:
       base hiding (Prelude)
