@@ -23,6 +23,7 @@ executable moire
       base >= 4.7 && < 5.0
     , relude ^>= 0.5.0
     , JuicyPixels
+    , bytestring
     , optparse-applicative
   mixins:
       base hiding (Prelude)

@@ -2,7 +2,9 @@ module Main (main) where
 
 import Codec.Picture
 import Codec.Picture.Types (pixelMapXY)
+import qualified Data.ByteString as BS
 import Options.Applicative
+import System.Environment (getArgs)
 
 data Options = Options
   { inputPath :: FilePath
@@ -32,13 +34,26 @@ moire x y px =
 
 main :: IO ()
 main = do
-  let opts = info (helper <*> options) (header "moire" <> fullDesc)
-  Options { inputPath, outputPath } <- execParser opts
-  readImage inputPath >>= \case
-    Left err -> die err
-    Right dynamicImage ->
-      dynamicImage
-        & convertRGBA8
-        & pixelMapXY moire
-        & ImageRGBA8
-        & savePngImage outputPath
+  args <- getArgs
+  if null args then do
+    input <- BS.getContents
+    unless (BS.null input) (
+      case decodeImage input of
+        Left err -> die err
+        Right dynamicImage ->
+          dynamicImage
+            & convertRGBA8
+            & pixelMapXY moire
+            & encodePng
+            & putLBSLn)
+  else do
+    let opts = info (helper <*> options) (header "moire" <> fullDesc)
+    Options { inputPath, outputPath } <- execParser opts
+    readImage inputPath >>= \case
+      Left err -> die err
+      Right dynamicImage ->
+        dynamicImage
+          & convertRGBA8
+          & pixelMapXY moire
+          & ImageRGBA8
+          & savePngImage outputPath
