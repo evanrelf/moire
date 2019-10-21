@@ -1,6 +1,7 @@
 module Main (main) where
 
 import Codec.Picture
+import Codec.Picture.Types (pixelMapXY)
 import Options.Applicative
 
 data Options = Options
@@ -23,8 +24,11 @@ options = Options
         , help "Output path"
         ])
 
-moire :: Image pixel -> Image pixel
-moire = identity -- TODO
+moire :: Int -> Int -> PixelRGBA8 -> PixelRGBA8
+moire x y px =
+  if (x `mod` 4 == 0) && (y `mod` 4 == 0)
+  then PixelRGBA8 0 0 0 255
+  else px
 
 main :: IO ()
 main = do
@@ -32,6 +36,9 @@ main = do
   Options { inputPath, outputPath } <- execParser opts
   readImage inputPath >>= \case
     Left err -> die err
-    Right inputImage -> do
-      let outputImage = dynamicPixelMap moire inputImage
-      savePngImage outputPath outputImage
+    Right dynamicImage ->
+      dynamicImage
+        & convertRGBA8
+        & pixelMapXY moire
+        & ImageRGBA8
+        & savePngImage outputPath
